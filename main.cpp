@@ -3,13 +3,13 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+//NOTE: This code assumes that the bit depth is 24 bits
+
+//function prototypes
+long map(long x, long in_min, long in_max, long out_min, long out_max);
+void simplifyImage(uint8_t* inputColor, int m);
+
 char density[] = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\" ^ `\'."; //fine-ness could be improved by adding more characters
-
-
-//from arduino map function reference 
-long map(long x, long in_min, long in_max, long out_min, long out_max) {
-	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-}
 
 
 
@@ -33,6 +33,13 @@ int main() {
 			uint8_t g = img_data[3 * img_width * i + 3 * j + 1];
 			uint8_t b = img_data[3 * img_width * i + 3 * j + 0];
 
+
+			
+			simplifyImage(&r, 10);
+			simplifyImage(&g, 10);
+			simplifyImage(&b, 10);
+			
+
 			uint32_t ave = (r + g + b) / 3;
 
 			uint32_t density_len = sizeof(density) / sizeof(char);
@@ -48,4 +55,18 @@ int main() {
 
 
 	return 0;
+}
+
+//from arduino map function reference 
+long map(long x, long in_min, long in_max, long out_min, long out_max) {
+	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+void simplifyImage(uint8_t* inputColor, int m) {
+	
+	//this approach will simplify 0-255 into m levels
+	//will yield a total of m^3 rgb color values
+
+	*inputColor = 255 * map(*inputColor, 0, 255, 0, m)/ m;
+
 }
